@@ -6,14 +6,19 @@
 
 using namespace std;
 
-Sim::Sim(size_t N, size_t Nsteps, string const& filename, double temperature, double J, Vec H)
-    : _N{N}, _Nsteps{Nsteps}, _out{filename}, _T{temperature}, _J{J}, _H{H}
+Sim::Sim(size_t N, size_t Nsteps, string const& filename, double temperature, double kb, double J, Vec H)
+    : _N{N}, _Nsteps{Nsteps}, _out{filename}, _kbT{temperature * kb}, _J{J}, _H{H}
 {
     // Make N^3 spins
     _spins.resize(N * N * N);
     // Generate random starting configuration
     generate(begin(_spins), end(_spins), [](){ return uniform_on_sphere(); });    
 }
+
+Sim::Sim(Config const& params) :
+    Sim(params.get<double>("N"), params.get<double>("Nsteps")
+	, params.get<string>("filename"), params.get<double>("kb") * params.get<double>("temperature")
+	, params.get<double>("J"), params.get<Vec>("H")) {}
 
 void Sim::run()
 {
@@ -36,7 +41,7 @@ void Sim::run()
         auto E = energy();
 	auto delta = E - oldEnergy;
 	// Accept or not
-	if(delta < 0 || uniform_unit() <= exp(- (1.0 / _T) * delta)) // Take kb = 1 for now
+	if(delta < 0 || uniform_unit() <= exp(- (1.0 / _kbT) * delta))
 	{
 	    // Accept
 	    oldEnergy = E;
@@ -49,7 +54,7 @@ void Sim::run()
 	}
 
 	// Output
-	_out << i << " " << E << " " << M << endl;
+	_out << i << " " << E << " " << printRaw(M) << endl;
     }
 }
 

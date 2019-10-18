@@ -7,11 +7,13 @@
 #include <string>
 
 #include "utils.hpp"
+#include "config.hpp"
 
 class Sim
 {
 public:
-    Sim(size_t N, size_t Nsteps, std::string const& filename, double temperature, double J, Vec H);
+    Sim(size_t N, size_t Nsteps, std::string const& filename, double temperature, double kb, double J, Vec H);
+    Sim(Config const& params);
 
     void run();
 
@@ -29,7 +31,7 @@ private:
     std::ofstream _out;
 
     // Physical params
-    double _T; // Temperature
+    double _kbT; // Temperature (in energy units)
     double _J;
     Vec _H;
     

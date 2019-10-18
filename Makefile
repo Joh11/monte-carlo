@@ -1,6 +1,6 @@
 CXXFLAGS = -std=c++11 -g
 
-sim: main.o sim.o utils.o
+sim: main.o sim.o utils.o config.o
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
 %.o: %.cpp

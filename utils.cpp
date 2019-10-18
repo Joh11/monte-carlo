@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <random>
+#include <cmath>
 
 #include "utils.hpp"
 
@@ -21,7 +22,7 @@ Vec uniform_on_sphere(size_t dim)
     Vec vec(3);
     generate(begin(vec), end(vec), [&](){ return ndist(mte); });
 
-    return vec / (vec * vec).sum();
+    return vec / sqrt(vec * vec).sum();
 }
 
 std::valarray<size_t> random_site(size_t N, size_t dim)

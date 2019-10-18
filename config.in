@@ -1,0 +1,10 @@
+# Simulation parameters
+N=10
+Nsteps=100000
+filename=data/data.out
+
+# Physical parameters
+temperature=10
+J=1
+kb=1
+H=(0 0 0)
