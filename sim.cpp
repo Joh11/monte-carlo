@@ -17,7 +17,8 @@ Sim::Sim(size_t N, size_t Nsteps, string const& filename, double temperature, do
 
 Sim::Sim(Config const& params) :
     Sim(params.get<double>("N"), params.get<double>("Nsteps")
-	, params.get<string>("filename"), params.get<double>("kb") * params.get<double>("temperature")
+	, params.get<string>("filename"), params.get<double>("temperature")
+	, params.get<double>("kb")
 	, params.get<double>("J"), params.get<Vec>("H")) {}
 
 void Sim::run()
