@@ -11,17 +11,27 @@ Config::Config(int argc, char *argv[])
         return; // Nothing to parse
 
     ifstream f{argv[1]};
-    
+
+
+    // Process the config file first
     std::string line;
     while(getline(f, line))
 	process(line);
 
-    cout << endl << endl;
+    // Then the command line arguments
+    if(argc >= 2)
+    {
+        for(size_t i = 2 ; i < argc ; ++i)
+            process(argv[i]);
+    }
+
+    // Print everything
+    for(auto it=_map.begin() ; it != _map.end() ; ++it)
+	cout << it->first << " = " << it->second << endl;
 }
 
 bool Config::process(std::string const& str)
 {
-    cout << str << endl;
     if(str[0] == '#') // Comments
 	return true;
     
