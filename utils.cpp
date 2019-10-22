@@ -6,7 +6,7 @@
 
 using namespace std;
 
-mt19937 mte(1729);// Fixed seed for determinism
+mt19937 mte(1730);// Fixed seed for determinism
 
 Vec uniform_on_sphere(size_t dim)
 {
