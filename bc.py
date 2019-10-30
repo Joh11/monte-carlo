@@ -2,6 +2,8 @@
 # A script to find the smallest system so that side effects are
 # negligible
 
+print("bonjour bonfuoehrui")
+
 import numpy as np
 import os
 import matplotlib.pyplot as plt
@@ -12,13 +14,14 @@ import matplotlib.pyplot as plt
 
 # Retreve and analyse data
 
-Ns = np.array([10, 15, 20, 30])
+# Ns = np.array([10, 15, 20, 30])
+Ns = np.array([10])
 extra_flags = ""
 
 config = "~/monte-carlo/config_bc.in"
 sim_bin = "~/monte-carlo/sim"
 
-workdir = "tmp/"
+workdir = "monte-carlo/"
 
 
 # Reset everything
@@ -35,13 +38,14 @@ for N in Ns:
         f.write("""#!/bin/bash
         {} {} "N={}" {}""".format(sim_bin, config, N, extra_flags))
     
+    os.system("pwd")
 
 print("Waiting for the scripts to run ...")
 with open(workdir + "wait.sh", "w") as f:
     f.write("""#!/bin/bash
 echo "All jobs done" """)
     
-os.system("sbatch -w --dependency $(sqeue -u felisaz --noheader --name sim.sh --format %i) {}".format(workdir + "wait.sh"))
+os.system("sbatch -w --dependency=$(squeue -u felisaz --noheader --name sim.sh --format %i) {}".format(workdir + "wait.sh"))
 
 
 print("Analysing the data ...")
