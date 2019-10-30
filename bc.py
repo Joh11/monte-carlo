@@ -21,7 +21,7 @@ extra_flags = ""
 config = "~/monte-carlo/config_bc.in"
 sim_bin = "~/monte-carlo/sim"
 
-workdir = "monte-carlo/"
+workdir = os.path.abspath("monte-carlo/") + "/"
 
 
 # Reset everything
@@ -38,8 +38,11 @@ for N in Ns:
         f.write("""#!/bin/bash
         {} {} "N={}" {}""".format(sim_bin, config, N, extra_flags))
     
+    os.system("cd " + prefix)
     os.system("pwd")
+    os.system("cd " + workdir)
 
+    
 print("Waiting for the scripts to run ...")
 with open(workdir + "wait.sh", "w") as f:
     f.write("""#!/bin/bash
