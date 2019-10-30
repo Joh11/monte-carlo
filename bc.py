@@ -1,3 +1,4 @@
+#!/bin/python3
 # A script to find the smallest system so that side effects are
 # negligible
 
@@ -5,29 +6,66 @@ import numpy as np
 import os
 import matplotlib.pyplot as plt
 
+# Generate all files to run each simulation in the scratch directory
 
-# Tweakable params
-T = 1
+# Run each sim within a sbatch
 
-Ns = 5
-Nrange = np.linspace(10, 20, Ns).astype(int)
+# Retreve and analyse data
 
-filenames = ["data/data{}.out".format(i) for i in Nrange]
+Ns = np.array([10, 15, 20, 30])
+extra_flags = ""
 
-def file_exists(filename):
-    return bool(os.path.isfile(filename))
+config = "~/monte-carlo/config_bc.in"
+sim_bin = "~/monte-carlo/sim"
+
+workdir = "tmp/"
+
+
+# Reset everything
+os.system("rm -rdf {}".format(workdir))
+os.system("mkdir -p {}".format(workdir))
+
+
+print("Generating and running scripts ...\n")
+for N in Ns:
+    prefix = "{}sim_{}/".format(workdir, N)
+    os.system("mkdir {}".format(prefix))
+
+    with open(prefix + "sim.sh", "w") as f:
+        f.write("""#!/bin/bash
+        {} {} "N={}" {}""".format(sim_bin, config, N, extra_flags))
+    
+
+print("Waiting for the scripts to run ...")
+with open(workdir + "wait.sh", "w") as f:
+    f.write("""#!/bin/bash
+echo "All jobs done" """)
+    
+os.system("sbatch -w --dependency $(sqeue -u felisaz --noheader --name sim.sh --format %i) {}".format(workdir + "wait.sh"))
+
+
+print("Analysing the data ...")
+datas = []
+for N in Ns:
+    prefix = "{}sim_{}/".format(workdir, N)
+    data = np.loadtxt(prefix + "data.out")
+    datas.append(data[:, 0:3]) # steps, E, and Mx
 
 plt.figure()
-for i, (N, filename) in enumerate(zip(Nrange, filenames)):
-    # Simulate
-    if not file_exists(filename):
-        os.system('./sim config_bc.in "N={}" "filename={}" "temperature={}"'.format(N, filename, T))
-
-    data = np.loadtxt(filename)
-    x = data[:, 0]
-    E = data[:, 1] / N ** 3
-    plt.plot(x, E, label="N={}".format(N))
+for data, N in zip(datas, Ns):
+    plt.subplot(1, 2, 1)
+    plt.plot(data[:, 0], data[:, 1], label="N={}".format(N))
+    plt.subplot(1, 2, 2)
+    plt.plot(data[:, 0], data[:, 2], label="N={}".format(N))
 
 plt.legend()
-plt.show()
 
+plt.subplot(1, 2, 1)
+plt.xlabel("steps")
+plt.ylabel("E")
+
+plt.subplot(1, 2, 2)
+plt.xlabel("steps")
+plt.ylabel("Mx")
+
+plt.show()
