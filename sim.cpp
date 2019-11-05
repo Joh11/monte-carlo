@@ -12,11 +12,11 @@ using namespace std;
 Sim::Sim(size_t N, size_t Nmeasure, size_t Nthermal
 	 , size_t stride, string const& filename, double temperature
 	 , double kb, double J, Vec H)
-    : _N{N}, _Nmeasure{Nmeasure}, _Nthermal{Nthermal}
+    : _N{N}, _Nmeasure{Nmeasure * N * N * N}, _Nthermal{Nthermal}
     , _stride{stride}, _out{filename}, _kbT{temperature * kb}
     , _J{J}, _H{H}, _energy{0.0}
     , _magnetization{0.0}
-{
+{    
     // Make N^3 spins
     _spins.resize(N * N * N);
     // Generate random starting configuration

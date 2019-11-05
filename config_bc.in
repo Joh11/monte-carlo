@@ -1,6 +1,6 @@
 # Simulation parameters
 N=10
-Nmeasure=100
+Nmeasure=5
 filename=data.out
 # Thermalization step = -1 => 5 N^3
 Nthermal=10000
