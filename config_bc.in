@@ -3,7 +3,7 @@ N=10
 Nmeasure=100
 filename=data.out
 # Thermalization step = -1 => 5 N^3
-Nthermal=1000
+Nthermal=10000
 stride=50
 
 # Physical parameters

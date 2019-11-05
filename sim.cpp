@@ -34,6 +34,8 @@ Sim::Sim(Config const& params) :
 
 void Sim::run()
 {
+    // We may have to put this somewhere else later
+    double V = _N * _N * _N;
     // Thermalization step
     
     cout << "Thermalization ..." << endl << endl;
@@ -47,7 +49,8 @@ void Sim::run()
 	if(i % progressStride == 0)
 	    cout << "iteration " << i << " / " << _Nmeasure << " (" << i * 100.0 / _Nmeasure<< " %)" << endl;
 	quietRun(_stride);
-	_out << i << " " << _energy << " " << printRaw(_magnetization) << endl;
+	_out << i << " " << _energy << " " << printRaw(_magnetization);
+        _out << _energy / V << printRaw<double>((1 / V) * _magnetization); // Energy and magnetization per site
 	energy();
     }
 }
