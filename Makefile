@@ -1,4 +1,4 @@
-CXXFLAGS = -std=c++11 -g
+CXXFLAGS = -std=c++11 -O3
 
 sim: main.o sim.o utils.o config.o
 	$(CXX) $(CXXFLAGS) -o $@ $^
