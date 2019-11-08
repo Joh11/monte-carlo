@@ -15,7 +15,7 @@ Sim::Sim(size_t N, size_t Nmeasure, double Nthermal
     : _N{N}, _Nmeasure{Nmeasure}, _Nthermal{static_cast<size_t>(Nthermal * N * N * N)}
     , _stride{static_cast<size_t>(stride * N * N * N)}, _out{filename}, _kbT{temperature * kb}
     , _J{J}, _H{H}, _energy{0.0}
-    , _magnetization{0.0}
+    , _magnetization{0.0, 0.0, 0.0}
 {    
     // Make N^3 spins
     _spins.resize(N * N * N);
