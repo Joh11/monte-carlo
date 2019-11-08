@@ -1,13 +1,12 @@
 # Simulation parameters
-N=10
+N=20
 Nmeasure=100
 filename=data.out
-# Thermalization step = -1 => 5 N^3
-Nthermal=5
-stride=50
+Nthermal=8
+stride=1
 
 # Physical parameters
-temperature=0.5
+temperature=2
 J=1
 kb=1
 H=(0 0 0)
