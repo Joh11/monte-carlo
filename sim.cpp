@@ -9,11 +9,11 @@
 
 using namespace std;
 
-Sim::Sim(size_t N, size_t Nmeasure, size_t Nthermal
-	 , size_t stride, string const& filename, double temperature
+Sim::Sim(size_t N, size_t Nmeasure, double Nthermal
+	 , double stride, string const& filename, double temperature
 	 , double kb, double J, Vec H)
-    : _N{N}, _Nmeasure{Nmeasure}, _Nthermal{Nthermal * N * N * N}
-    , _stride{stride}, _out{filename}, _kbT{temperature * kb}
+    : _N{N}, _Nmeasure{Nmeasure}, _Nthermal{static_cast<size_t>(Nthermal * N * N * N)}
+    , _stride{static_cast<size_t>(stride * N * N * N)}, _out{filename}, _kbT{temperature * kb}
     , _J{J}, _H{H}, _energy{0.0}
     , _magnetization{0.0}
 {    
@@ -28,8 +28,8 @@ Sim::Sim(size_t N, size_t Nmeasure, size_t Nthermal
 }
 
 Sim::Sim(Config const& params) :
-    Sim(params.get<size_t>("N"), params.get<size_t>("Nmeasure"), params.get<size_t>("Nthermal")
-	, params.get<size_t>("stride"), params.get<string>("filename"), params.get<double>("temperature")
+    Sim(params.get<size_t>("N"), params.get<size_t>("Nmeasure"), params.get<double>("Nthermal")
+	, params.get<double>("stride"), params.get<string>("filename"), params.get<double>("temperature")
 	, params.get<double>("kb"), params.get<double>("J"), params.get<Vec>("H")) {}
 
 void Sim::run()
@@ -50,7 +50,7 @@ void Sim::run()
 	    cout << "iteration " << i << " / " << _Nmeasure << " (" << i * 100.0 / _Nmeasure<< " %)" << endl;
 	quietRun(_stride);
 	_out << i << " " << _energy << " " << printRaw(_magnetization);
-        _out << _energy / V << printRaw<double>((1 / V) * _magnetization); // Energy and magnetization per site
+        _out << " " << _energy / V << " " << printRaw<double>((1 / V) * _magnetization) << endl; // Energy and magnetization per site
 	energy();
     }
 }
