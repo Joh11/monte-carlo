@@ -1,0 +1,58 @@
+#+latex_header: \usepackage[margin=0.3in]{geometry}
+#+latex_header: \usepackage{bm}
+#+latex_header: \setlength{\parindent}{0pt}
+#+latex_header: \usepackage{amsmath}
+#+latex_header: \newcommand\dd{\mathrm{d}}
+#+latex_header: \newcommand\diff[2]{\frac{\dd #1}{\dd #2}}
+#+latex_header: \newcommand\pdiff[2]{\frac{\partial #1}{\partial #2}}
+#+latex_header: \newcommand\aop{\hat{a}}
+#+latex_header: \renewcommand\vec{\bm}
+
+#+title: Project Report : Scaling function for the 3D Heisenberg ferromagnet
+
+* Theoretical considerations
+
+The standard way to define the Heisenberg model hamiltonian is the
+following :
+
+\begin{equation}
+H = -J \sum_{<i j>} \vec S_i \cdot \vec S_j - \vec H \cdot \sum_i \vec S_i
+\end{equation}
+
+However, this sweeps under the rug the dimension and values of the
+constants. In our case, we need to know the dimension of the constants
+to be able to compare the energy to the thermal energy \(\sim k_B T
+\). Let's focus on the external magnetic field term first. 
+
+By definition, a system with a given magnetic moment \(\vec \mu\),
+when put inside an external magnetic field \(\vec B\), will have the
+following energy :
+
+\begin{equation}
+U = - \vec{\mu} \cdot \vec B
+\end{equation}
+
+In our case, the magnetic moment does not come from the angular
+momentum of the electron, but from its spin. In this case, it can be
+can be related to the spin by:
+\begin{equation}
+\vec \mu = g \frac{q_e}{2m_e} \vec S = g \mu_B \frac{\vec S}{\hbar}
+\end{equation}
+\(\mu_B = \frac{q_e\hbar}{2m_e}\) is a constant called Bohr magneton.
+
+* Outline of the process
+** Finding the right number of thermalization steps, such that the system is in thermal equilibrium
+Using a simulation with a grid size of 30 at a temperature 2 (a stride
+of 1000 for the measurements), we can clearly see that the energy
+converges after 20% of the steps, i.e. 20000. This yields a number of
+thermalizations steps of around 8.
+
+[[./figs/convergenceN30nT2n1e6.png]]
+
+Even though it converges, to get even more sensible results, we would
+need to simulate with greater strides (of the order of \(N^3\)) such
+that the samples are not too much correlated.
+
+** Finding the right size of the system, such that side effects are negligible
+** Finding the critical temperature, and comparaison to the theoretical critical value
+** Making a grid in H-T space to get the magnetic susceptibility
