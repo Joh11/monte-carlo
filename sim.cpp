@@ -84,7 +84,11 @@ double Sim::energy() const
 
 Spin Sim::magnetization() const
 {
-    return _spins.sum();
+    /* We cannot use _spins.sum() as the cluster has an older version
+     * of GCC where this bug
+     * https://gcc.gnu.org/bugzilla/show_bug.cgi?id=87641 is not
+     * fixed */
+    return accumulate(begin(_spins), end(_spins), Vec{0.0, 0.0, 0.0});
 }
 
 size_t Sim::index(int i, int j, int k) const
