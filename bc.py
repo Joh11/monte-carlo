@@ -4,8 +4,6 @@
 
 import numpy as np
 import os
-import matplotlib.pyplot as plt
-import time
 
 # Generate all files to run each simulation in the scratch directory
 
@@ -34,8 +32,9 @@ for N in Ns:
 
     with open(prefix + "sim.sh", "w") as f:
         f.write("""#!/bin/bash -l
-        #SBATCH --time=1:00:00
-        {} {} "N={}" {}""".format(sim_bin, config, N, extra_flags))
+        #SBATCH --job-name=sim_N_{}
+        #SBATCH --time=0-01:00
+        {} {} "N={}" {}""".format(N, sim_bin, config, N, extra_flags))
     
     os.system("cd {} && sbatch sim.sh && cd {}".format(prefix, workdir))
 
