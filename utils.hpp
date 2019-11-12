@@ -44,7 +44,7 @@ template <typename T>
 std::istream& operator>>(std::istream& in, std::valarray<T> & v)
 {
     char c;
-    in >> c;
+    in >> std::noskipws >> c;
     if(c != '(')
 	throw std::runtime_error{"No parenthesis"};
 
@@ -52,8 +52,8 @@ std::istream& operator>>(std::istream& in, std::valarray<T> & v)
     while(in.good())
     {
 	T val;
-	in >> val;
-	in >> c;
+	in >> std::noskipws >> val;
+	in >> std::noskipws >> c;
 	vec.push_back(val);
 	if (c == ')')
 	    break;
