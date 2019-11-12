@@ -47,11 +47,10 @@ void Sim::run()
     for(size_t i = 0 ; i < _Nmeasure ; ++i)
     {
 	if(i % progressStride == 0)
-	    cout << "iteration " << i << " / " << _Nmeasure << " (" << i * 100.0 / _Nmeasure<< " %)" << endl;
+	    cout << "iteration " << (_Nthermal + i * _stride) << " / " << _Nmeasure << " (" << i * 100.0 / _Nmeasure<< " %)" << endl;
 	quietRun(_stride);
 	_out << i << " " << _energy << " " << printRaw(_magnetization);
         _out << " " << _energy / V << " " << printRaw<double>((1 / V) * _magnetization) << endl; // Energy and magnetization per site
-	energy();
     }
 }
 
@@ -78,7 +77,7 @@ double Sim::energy() const
 	    }
 	}
     }
-
+    
     return -_J * interaction - (_H * magnetization).sum();
 }
 
@@ -129,14 +128,14 @@ void Sim::quietRun(size_t Nsteps)
 	    Spin oldSpin = _spins[index(rs)];
 	    _spins[index(rs)] = newSpin;
 
-	    if(abs(_energy - energy()) > 1e-6)
-	    {
-		cout << "Mistmatch : " << endl;
-		cout << "site" << rs << endl;
-		cout << "spin" << oldSpin << endl;
-		cout << "newSpin " << newSpin << endl;
-		cout << "delta " << delta << endl;
-	    }
+	    // if(abs(_energy - energy()) > 1e-6)
+	    // {
+	    // 	cout << "Mistmatch : " << endl;
+	    // 	cout << "site" << rs << endl;
+	    // 	cout << "spin" << oldSpin << endl;
+	    // 	cout << "newSpin " << newSpin << endl;
+	    // 	cout << "delta " << delta << endl;
+	    // }
 	}
 	// else
 	    // cout << "reject" << endl;
