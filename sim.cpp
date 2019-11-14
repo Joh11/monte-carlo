@@ -11,16 +11,18 @@ using namespace std;
 
 Sim::Sim(size_t N, size_t Nmeasure, double Nthermal
 	 , double stride, string const& filename, double temperature
-	 , double kb, double J, Vec H, bool ferroStart)
+	 , double kb, double J, Vec H, bool ferroStart, std::string const& outstate
+	 , std::string const& instate)
     : _N{N}, _Nmeasure{Nmeasure}, _Nthermal{static_cast<size_t>(Nthermal * N * N * N)}
-    , _stride{static_cast<size_t>(stride * N * N * N)}, _out{filename}, _kbT{temperature * kb}
-    , _J{J}, _H{H}, _energy{0.0}
-    , _magnetization{0.0, 0.0, 0.0}
+    , _stride{static_cast<size_t>(stride * N * N * N)}, _out{filename}, _outstate{outstate}, _kbT{temperature * kb}
+    , _J{J}, _H{H}, _energy{0.0}, _magnetization{0.0, 0.0, 0.0}
 {    
     // Make N^3 spins
     _spins.resize(N * N * N);
 
-    if(ferroStart) // Put all spins in the Z direction
+    if(instate != "")
+	loadState(instate);
+    else if(ferroStart) // Put all spins in the Z direction
 	fill(begin(_spins), end(_spins), Vec{0, 0, 1});
     else // Generate random starting configuration
 	generate(begin(_spins), end(_spins), [](){ return uniform_on_sphere(); });
@@ -34,7 +36,8 @@ Sim::Sim(size_t N, size_t Nmeasure, double Nthermal
 Sim::Sim(Config const& params) :
     Sim(params.get<size_t>("N"), params.get<size_t>("Nmeasure"), params.get<double>("Nthermal")
 	, params.get<double>("stride"), params.get<string>("filename"), params.get<double>("temperature")
-	, params.get<double>("kb"), params.get<double>("J"), params.get<Vec>("H"), params.get<bool>("ferroStart")) {}
+	, params.get<double>("kb"), params.get<double>("J"), params.get<Vec>("H"), params.get<bool>("ferroStart")
+	, params.get<string>("outstate"), params.get<string>("instate")) {}
 
 void Sim::run()
 {
@@ -56,6 +59,23 @@ void Sim::run()
 	_out << i << " " << _energy << " " << printRaw(_magnetization);
         _out << " " << _energy / V << " " << printRaw<double>((1 / V) * _magnetization) << endl; // Energy and magnetization per site
     }
+
+    if(_outstate != "")
+	storeState(_outstate);
+}
+
+void Sim::storeState(string const& filename) const
+{
+    ofstream o{filename};
+    for(auto const& spin : _spins)
+	o << spin;
+}
+
+void Sim::loadState(string const& filename)
+{
+    ifstream i{filename};
+    for(auto & spin : _spins)
+	i >> spin;
 }
 
 double Sim::energy() const
@@ -122,8 +142,8 @@ void Sim::quietRun(size_t Nsteps)
 	auto newSpin = uniform_on_sphere();
 	// Compute the difference in energy
 	auto delta = deltaE(rs, newSpin);
-	// Accept or not
-	if(delta < 0 || uniform_unit() <= exp(- (1.0 / _kbT) * delta))
+	// Accept or not ; if T=0 then only accept if we decrease the energy
+	if(delta < 0 || (_kbT != 0 && (uniform_unit() <= exp(- (1.0 / _kbT) * delta))))
 	{
 	    // cout << "accept" << endl;
 	    // Accept

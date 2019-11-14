@@ -14,7 +14,7 @@ class Sim
 public:
     Sim(size_t N, size_t Nmeasure, double Nthermal, double stride
 	, std::string const& filename, double temperature, double kb, double J
-	, Vec H, bool ferroStart);
+	, Vec H, bool ferroStart, std::string const& outstate, std::string const& intstate);
     Sim(Config const& params);
 
     void run();
@@ -32,6 +32,10 @@ private:
 
     // Compute only the difference in energy
     double deltaE(std::valarray<size_t> site, Spin const& newSpin) const;
+
+    // Store and load the state of the simulation
+    void storeState(std::string const& filename) const;
+    void loadState(std::string const& filename);
     
     // Simulation params
     size_t _N; // Size of our system along one dimension
@@ -39,6 +43,7 @@ private:
     size_t _Nthermal;
     size_t _stride;
     std::ofstream _out;
+    std::string _outstate;
 
     // Physical params
     double _kbT; // Temperature (in energy units)
