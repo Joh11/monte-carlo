@@ -12,7 +12,9 @@
 class Sim
 {
 public:
-    Sim(size_t N, size_t Nmeasure, double Nthermal, double stride, std::string const& filename, double temperature, double kb, double J, Vec H);
+    Sim(size_t N, size_t Nmeasure, double Nthermal, double stride
+	, std::string const& filename, double temperature, double kb, double J
+	, Vec H, bool ferroStart);
     Sim(Config const& params);
 
     void run();

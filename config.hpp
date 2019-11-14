@@ -24,11 +24,26 @@ public:
 
 	return val;
     }
-
+    
 private:
     bool process(std::string const& str);
     
     std::map<std::string, std::string> _map;
 };
+
+template<>
+inline bool Config::get<bool>(std::string const&key) const
+{
+    auto it = _map.find(key);
+    if(it == std::end(_map))
+	throw std::runtime_error{"No such key found : " + key};
+
+    if(it->second == "true")
+	return true;
+    if(it->second == "false")
+	return false;
+    throw std::runtime_error{"Invalid boolean string : " + it->second};
+}
+
 
 #endif

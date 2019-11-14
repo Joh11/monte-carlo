@@ -11,7 +11,7 @@ using namespace std;
 
 Sim::Sim(size_t N, size_t Nmeasure, double Nthermal
 	 , double stride, string const& filename, double temperature
-	 , double kb, double J, Vec H)
+	 , double kb, double J, Vec H, bool ferroStart)
     : _N{N}, _Nmeasure{Nmeasure}, _Nthermal{static_cast<size_t>(Nthermal * N * N * N)}
     , _stride{static_cast<size_t>(stride * N * N * N)}, _out{filename}, _kbT{temperature * kb}
     , _J{J}, _H{H}, _energy{0.0}
@@ -19,8 +19,12 @@ Sim::Sim(size_t N, size_t Nmeasure, double Nthermal
 {    
     // Make N^3 spins
     _spins.resize(N * N * N);
-    // Generate random starting configuration
-    generate(begin(_spins), end(_spins), [](){ return uniform_on_sphere(); });
+
+    if(ferroStart) // Put all spins in the Z direction
+	fill(begin(_spins), end(_spins), Vec{0, 0, 1});
+    else // Generate random starting configuration
+	generate(begin(_spins), end(_spins), [](){ return uniform_on_sphere(); });
+    
 
     // Compute the energy and magnetization
     _energy = energy();
@@ -30,7 +34,7 @@ Sim::Sim(size_t N, size_t Nmeasure, double Nthermal
 Sim::Sim(Config const& params) :
     Sim(params.get<size_t>("N"), params.get<size_t>("Nmeasure"), params.get<double>("Nthermal")
 	, params.get<double>("stride"), params.get<string>("filename"), params.get<double>("temperature")
-	, params.get<double>("kb"), params.get<double>("J"), params.get<Vec>("H")) {}
+	, params.get<double>("kb"), params.get<double>("J"), params.get<Vec>("H"), params.get<bool>("ferroStart")) {}
 
 void Sim::run()
 {
