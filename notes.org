@@ -1,0 +1,6 @@
+* Roadmap
+** Add error bars on my zoom of the magnetization to see if it is sensible
+** Do a fit to find the critical scaling and temperature from the M(T) plot
+** Make a block diagram of how my code works (files, classes, functions, ...)
+* Ideas
+** Compute the standard deviation for both the primitive method and the magnetization fluctuation
