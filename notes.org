@@ -4,3 +4,4 @@
 ** Make a block diagram of how my code works (files, classes, functions, ...)
 * Ideas
 ** Compute the standard deviation for both the primitive method and the magnetization fluctuation
+** Implement the cluster update method given in [[https://journals.aps.org/prb/pdf/10.1103/PhysRevB.48.3249][this paper]]
