@@ -9,20 +9,11 @@ import os
 from math import sqrt
 
 extra_args = ""
-# For a general T scan
 H = 0
-Ts = np.linspace(0.01, 2, 100)
+Ts = np.linspace(0.01, 2, 200)
 
 cfgfile = "config/scan.in"
 outdir  = "data/scanT/"
-
-# In depth scan
-# H = 0
-# Ts = np.linspace(0.70, 0.80, 20)
-
-# cfgfile = "config/scan.in"
-# outdir  = "data/scanTdepth/"
-# extra_args = "N=40"
 
 def make_filename(H, T):
     return outdir + "scan_{}_{}.out".format(H, T)
@@ -36,32 +27,49 @@ def run_sim():
             system("./sim {} \"filename={}\" \"temperature={}\" \"H=(0 0 {})\" {}".format(cfgfile,
                                                                                           f, T, H, extra_args))
 
-def loadMz(return_err=False):
+def binning(M, nbins):
+    M = np.reshape(M, (nbins, -1))
+    mu_m = np.mean(M, axis=1)
+    sd_m = np.std(M, axis=1)
+
+    mu_global = np.mean(mu_m)
+    SD = np.std(mu_m)
+
+    return mu_global, SD / sqrt(nbins)
+
+def loadMz():
     Mzs = []
     errs = []
+
     for T in Ts:
         data = np.loadtxt(make_filename(H, T))
-        Mz = np.mean(data[:, -1])
+        Mz, err = binning(data[:, -1], 10)
         Mzs.append(Mz)
-        if return_err:
-            errs.append(np.std(data[:, -1]))
+        errs.append(err)
 
-    if return_err:
-        return np.array(Mzs), np.array(errs)
-    return np.array(Mzs)
+    Mzs = np.array(Mzs)
+    errs = np.array(errs)
 
-def loadM():
-    Ms = []
-    for T in Ts:
-        data = np.loadtxt(make_filename(H, T))
-        Mxyz = np.mean(data[:, 2:5], axis=0)
-        M = sqrt(np.sum(Mxyz * Mxyz))
-        Ms.append(M)
+    return Mzs, errs
 
-    return np.array(Ms)
+def plot_with_errs():
+    Mzs, errs = loadMz()
 
-def criticalScaling(Tmin=0.5 , Tmax=0.74):
-    M, errs = loadMz(return_err=True)
+    plt.figure()
+    plt.errorbar(Ts, Mzs, errs, fmt='.')
+    plt.xlabel("T")
+    plt.ylabel("Mz per site")
+
+    plt.figure()
+    plt.scatter(Ts, errs)
+    plt.ylim(bottom=0)
+    plt.xlabel("T")
+    plt.ylabel("Error on the estimator")
+    
+    plt.show()
+
+def criticalScaling(Tmin=0.45 , Tmax=0.65):
+    M, errs = loadMz()
 
     mask = (Ts >= Tmin) * (Ts <= Tmax)
     x = Ts[mask]
@@ -73,32 +81,6 @@ def criticalScaling(Tmin=0.5 , Tmax=0.74):
 
     p0 = np.array([1., 0.8, 0.5]) # initial guess
     p1, success = optimize.leastsq(errfunc, p0[:], args=(x, y, errs))
-    
-    print(p1, success)
-
-    plt.figure()
-    plt.scatter(Ts, M, label="Simulated points")
-
-    Tscale = np.linspace(Tmin, Tmax)
-    plt.plot(Tscale, fitfunc(p1, Tscale), color='r', label="Fit : Tc = {:.3}, β = {:.3}".format(p1[1], p1[2]))
-    
-    plt.xlabel("T")
-    plt.ylabel("m(T)")
-    plt.legend()
-    plt.show()
-
-def criticalScalingNoErr(Tmin=0.5 , Tmax=0.74):
-    M = loadM()
-
-    mask = (Ts >= Tmin) * (Ts <= Tmax)
-    x = Ts[mask]
-    y = M[mask]
-    
-    fitfunc = lambda p, T: p[0] * ((p[1] - T) / p[1]) ** p[2]
-    errfunc = lambda p, T, M: (fitfunc(p, T) - M)
-
-    p0 = np.array([1., 0.8, 0.5]) # initial guess
-    p1, success = optimize.leastsq(errfunc, p0[:], args=(x, y))
     
     print(p1, success)
 
