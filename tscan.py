@@ -10,22 +10,27 @@ from math import sqrt
 
 extra_args = ""
 H = 0
-Ts = np.linspace(0.01, 2, 200)
+Ts = np.linspace(0.01, 2, 100)
 
 cfgfile = "config/scan.in"
-outdir  = "data/scanT/"
+outdir  = "data/scanT_50/"
 
 def make_filename(H, T):
     return outdir + "scan_{}_{}.out".format(H, T)
 
 def run_sim():
-    for T in Ts:
+    statefile = outdir + "annealing.state"
+    f = make_filename(H, Ts[0])
+    system("./sim {} \"filename={}\" \"temperature={}\" \"H=(0 0 {})\" \"outstate={}\" {}"
+           .format(cfgfile, f, Ts[0], H, statefile, extra_args))
+    
+    for T in Ts[1:]:
         f = make_filename(H, T)
         if os.path.exists(f):
             print("Skipped T={}".format(T))
         else:
-            system("./sim {} \"filename={}\" \"temperature={}\" \"H=(0 0 {})\" {}".format(cfgfile,
-                                                                                          f, T, H, extra_args))
+            system("./sim {} \"filename={}\" \"temperature={}\" \"H=(0 0 {})\" \"Nthermal=20\" {}"
+                   .format(cfgfile, f, T, H, extra_args))
 
 def binning(M, nbins):
     M = np.reshape(M, (nbins, -1))
@@ -51,6 +56,46 @@ def loadMz():
     errs = np.array(errs)
 
     return Mzs, errs
+
+def loadE():
+    Es = []
+    stds = []
+
+    for T in Ts:
+        data = np.loadtxt(make_filename(H, T))
+        E, std = np.mean(data[:, 5]), np.std(data[:, 5])
+        Es.append(E)
+        stds.append(std)
+
+    Es = np.array(Es)
+    stds = np.array(stds)
+
+    return Es, stds
+
+def plot_energy_and_std():
+    Es, stds = loadE()
+
+    plt.figure()
+    plt.scatter(Ts, Es)
+
+    plt.xlabel("T")
+    plt.ylabel("E")
+    
+    plt.figure()
+    plt.scatter(Ts, stds)
+
+    plt.xlabel("T")
+    plt.ylabel("sigma(E)")
+
+    plt.figure()
+    plt.scatter(Ts, (50 ** 3) * stds * stds / (Ts * Ts), label="Fluctuation")
+    plt.scatter((Ts[1:] + Ts[:-1]) / 2, np.diff(Es) / np.diff(Ts), label="Differentiation")
+    
+    plt.xlabel("T")
+    plt.ylabel("specific heat")
+    plt.legend()
+
+    plt.show()
 
 def plot_with_errs():
     Mzs, errs = loadMz()

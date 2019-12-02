@@ -1,9 +1,9 @@
 # The basic config file to run the scan
 # Simulation parameters
-N=30
+N=50
 Nmeasure=100
 # filename= this is left out blank so that the scanning script fills it
-Nthermal=1000
+Nthermal=100
 stride=1
 instate=
 outstate=
