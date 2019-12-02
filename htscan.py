@@ -5,11 +5,22 @@ import matplotlib.pyplot as plt
 from mpl_toolkits import mplot3d
 from os import system, path
 
-Hs = np.linspace(0, 5, 20)
-Ts = np.linspace(0, 4, 20)
+from tscan import binning
+
+Tc = 0.702
+
+dH = 0.01 # The variation of H used to compute the derivative
+Hs_mean = np.linspace(0.1, 5, 4)
+reduced_Ts = np.logspace(-6, 0)
+Ts = Tc * (1 + reduced_Ts)
+
+# Add intermediate values of H for differentiation
+dxs = np.array([[-0.5, 0.5]]).repeat(len(Hs_mean), axis=0)
+Hs = np.column_stack([Hs_mean, Hs_mean]) + dxs * dH
+Hs = Hs.reshape((-1,))
 
 cfgfile = "config/scan.in"
-outdir  = "data/scan/"
+outdir  = "data/scanHT/"
 
 def make_filename(H, T):
     return outdir + "scan_{}_{}.out".format(H, T)
@@ -31,18 +42,83 @@ def run_sim():
                 system("./sim {} \"filename={}\" \"temperature={}\" \"H=(0 0 {})\" \"outstate={}\" \"instate={}\" \"Nthermal=100\" "
                        .format(cfgfile, f, T, H, statefile, statefile))
 
-def rescale(s, H, T):
+def rescale(s, H, epsilon):
     # critical exponents and temperature (theoretical ones)
     beta = 0.365
     gamma = 1.39
     delta = 4.8
-    Tc = 0.75
 
-    epsilon = (T - Tc) / Tc
     x = epsilon ** (gamma + beta) / H
     y = s * (1 - 1 / delta)
 
     return x, y
+
+def susceptibility_from_fluctuation():
+    kiss = np.zeros((len(Hs), len(Ts)))
+
+    for i, H in enumerate(Hs):
+        for j, T in enumerate(Ts):
+            data = np.loadtxt(make_filename(H, T))
+            Mz = np.mean(data[:, -1])
+            kiss[i, j] = 1 / T  * (np.mean(Mz * Mz) - np.mean(Mz) ** 2)# we assumed kb = 1
+
+    return kiss
+
+def load_Mz():
+    Mzss = np.zeros((len(Hs), len(Ts)))
+    errs = np.zeros((len(Hs), len(Ts)))
+
+    for i, H in enumerate(Hs):
+        for j, T in enumerate(Ts):
+            data = np.loadtxt(make_filename(H, T))
+            Mzss[i, j], errs[i, j] = np.mean(data[:, -1]), np.std(data[:, -1])
+    return Mzss, errs
+
+
+def fluct_vs_diff():
+    # Get the fluctuation susceptibility
+    ki_fluct = susceptibility_from_fluctuation()
+    ki_fluct = (ki_fluct[::2] + ki_fluct[1::2]) / 2
+
+    # Get the susceptibility from differentiation
+    Mzss, errs = load_Mz()
+    ki_diff = (Mzss[1::2] - Mzss[::2]) / dH
+
+    # First with one
+    plt.figure()
+    plt.scatter(Ts, ki_fluct[0], label="Fluctuation susceptibility")
+    plt.errorbar(Ts, ki_diff[0], errs[0], label="Differentation susceptibility", fmt=".")
+
+    print(ki_diff[0], ki_diff[-1])
+    
+    plt.legend()
+    plt.xlabel("T")
+    plt.ylabel("χ")
+
+    # Then with all
+    plt.figure()
+    for i, H in enumerate(Hs_mean):
+        # plt.scatter(Ts, ki_fluct[0], label="Fluctuation susceptibility - {:.2}".format(H))
+        plt.plot(Ts, ki_diff[i], label="Differentation susceptibility - {:.2}".format(H))
+    
+    plt.legend()
+    plt.xlabel("T")
+    plt.ylabel("χ")
+
+    # Then normalized version
+    plt.figure()
+    for i, H in enumerate(Hs_mean):
+        # plt.scatter(Ts, ki_fluct[0], label="Fluctuation susceptibility - {:.2}".format(H))
+        x, y = rescale(ki_diff[i], H, reduced_Ts)
+        plt.scatter(x, y, label="Differentation susceptibility - {:.2}".format(H))
+
+    plt.xscale('log')
+    plt.legend()
+    plt.xlabel("")
+    plt.ylabel("")
+
+    
+    plt.show()
 
 def analysis():
     shape = (len(Hs), len(Ts))
