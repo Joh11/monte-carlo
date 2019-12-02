@@ -1,0 +1,14 @@
+# The basic config file to run the scan
+# Simulation parameters
+N=30
+Nmeasure=100
+# filename= this is left out blank so that the scanning script fills it
+Nthermal=1000
+stride=1
+instate=
+outstate=
+
+# Physical parameters
+ferroStart=true
+J=1
+kb=1
