@@ -1,5 +1,4 @@
 """A program to scan a grid in H-T space, using annealing in the T direction"""
-
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits import mplot3d
@@ -10,9 +9,11 @@ from tscan import binning
 Tc = 0.702
 
 dH = 0.01 # The variation of H used to compute the derivative
-Hs_mean = np.linspace(0.1, 5, 4)
-reduced_Ts = np.logspace(-6, 0)
-Ts = Tc * (1 + reduced_Ts)
+Hs_mean = np.linspace(1, 50, 4)
+# reduced_Ts = np.logspace(-6, 0)
+# Ts = Tc * (1 + reduced_Ts)
+Ts = np.linspace(0.5, 3, 100)
+reduced_Ts = (Ts - Tc) / Tc
 
 # Add intermediate values of H for differentiation
 dxs = np.array([[-0.5, 0.5]]).repeat(len(Hs_mean), axis=0)
@@ -116,8 +117,7 @@ def fluct_vs_diff():
     plt.legend()
     plt.xlabel("")
     plt.ylabel("")
-
-    
+        
     plt.show()
 
 def analysis():
