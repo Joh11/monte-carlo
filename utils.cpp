@@ -1,12 +1,14 @@
 #include <algorithm>
 #include <random>
 #include <cmath>
+#include <ctime>
 
 #include "utils.hpp"
 
 using namespace std;
 
-mt19937 mte(1730);// Fixed seed for determinism
+// mt19937 mte(1730); // Fixed seed for determinism
+mt19937 mte(time(NULL)); // Initialize seed with time
 
 Vec uniform_on_sphere(size_t dim)
 {
