@@ -54,7 +54,7 @@ void Sim::run()
     for(size_t i = 0 ; i < _Nmeasure ; ++i)
     {
 	if(i % progressStride == 0)
-	    cout << "iteration " << (_Nthermal + i * _stride) << " / " << _Nmeasure << " (" << i * 100.0 / _Nmeasure<< " %)" << endl;
+	    cout << "iteration " << (_Nthermal + i * _stride) << " / " << _Nthermal + _Nmeasure * _stride << " (" << i * 100.0 / _Nmeasure<< " %)" << endl;
 	quietRun(_stride);
 	_out << i << " " << _energy << " " << printRaw(_magnetization);
         _out << " " << _energy / V << " " << printRaw<double>((1 / V) * _magnetization) << endl; // Energy and magnetization per site
