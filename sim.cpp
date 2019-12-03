@@ -57,7 +57,17 @@ void Sim::run()
 	    cout << "iteration " << (_Nthermal + i * _stride) << " / " << _Nthermal + _Nmeasure * _stride << " (" << i * 100.0 / _Nmeasure<< " %)" << endl;
 	quietRun(_stride);
 	_out << i << " " << _energy << " " << printRaw(_magnetization);
-        _out << " " << _energy / V << " " << printRaw<double>((1 / V) * _magnetization) << endl; // Energy and magnetization per site
+	// Energy and magnetization per site
+        _out << " " << _energy / V << " " << printRaw<double>((1 / V) * _magnetization);
+	// Sum of each spin component square per site
+	double Sx = 0, Sy = 0, Sz = 0;
+	for (auto const& spin : _spins)
+	{
+            Sx += spin[0] * spin[0];
+	    Sy += spin[1] * spin[1];
+	    Sz += spin[2] * spin[2];
+	}
+	_out << " " << printRaw<double>((1 / V) * Vec{Sx, Sy, Sz}) << endl;
     }
 
     if(_outstate != "")
