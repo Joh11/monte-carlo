@@ -4,11 +4,12 @@ import numpy as np
 from os import system
 import h5py
 
-Hs = np.array([0.1, 0.2,
-               1, 1.1,
-               2, 2.1,
-               3, 3.1])
-Ts = np.linspace(0.1, 2, 100)
+# Hs = np.array([0.1, 0.2,
+#                1, 1.1,
+#                2, 2.1,
+#                3, 3.1])
+Hs = np.array([0])
+Ts = np.linspace(0.1, 2, 200)
 
 config = "config/big.in"
 outdir = "data/big/"
@@ -20,7 +21,7 @@ statefile = outdir + "state"
 Nsample = 10
 samples = ["sample_{}".format(i+1) for i in range(Nsample)]
 
-with h5py.File("dataset.hdf5", "w") as f:
+with h5py.File("dataset0.hdf5", "w") as f:
     f.attrs["config"] = config
     f.attrs["Nanneal"] = Nanneal
     for sample in samples:
